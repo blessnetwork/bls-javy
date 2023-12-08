@@ -1,5 +1,3 @@
-//use std::collections::HashMap;
-
 use anyhow::{bail, Result};
 use javy::{quickjs::JSValue, Runtime};
 use blockless_sdk::*;
@@ -12,7 +10,7 @@ mod config;
 pub(super) struct FetchIO;
 
 impl JSApiSet for FetchIO {
-    fn register(&self, runtime: &Runtime, config: &APIConfig) -> Result<()> {
+    fn register(&self, runtime: &Runtime, _config: &APIConfig) -> Result<()> {
         let context = runtime.context();
 
         let global = context.global_object()?;
@@ -35,6 +33,7 @@ impl JSApiSet for FetchIO {
                 // Convert JSValueRefs to Rust types.
                 let url: String = url.try_into()?;
 
+                // Implement the Blockless SDK link
                 let opts = HttpOptions::new("GET", 30, 10);
                 let http = BlocklessHttp::open(&url, &opts);
                 let http = http.unwrap();
