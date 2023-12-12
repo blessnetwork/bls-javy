@@ -1,53 +1,22 @@
-use anyhow::{bail, Result};
+use std::collections::HashMap;
+use anyhow::{anyhow, Result};
 use javy::{quickjs::JSValue, Runtime};
-use blockless_sdk::*;
+use serde_json::{Value, from_slice};
 
 use crate::{APIConfig, JSApiSet};
-pub(super) use config::FetchIOConfig;
-
-mod config;
+use javy::quickjs::{JSContextRef, JSValueRef};
 
 pub(super) struct FetchIO;
 
 impl JSApiSet for FetchIO {
     fn register(&self, runtime: &Runtime, _config: &APIConfig) -> Result<()> {
         let context = runtime.context();
-
         let global = context.global_object()?;
-
-        let mut javy_object = global.get_property("Javy")?;
-
-        // If you're defining something on the `Javy` object, ensure it exists.
-        if javy_object.is_undefined() {
-            javy_object = context.object_value()?;
-            global.set_property("Javy", javy_object)?;
-        }
 
         // `wrap_callback`` has a static lifetime so you can't use references to the config in its body.
         global.set_property(
-            "__javy_fetchio_get",
-            context.wrap_callback(move |_ctx, _this, args| {
-                let [url] = args else {
-                    bail!("Incorrect number of arguments");
-                };
-                // Convert JSValueRefs to Rust types.
-                let url: String = url.try_into()?;
-
-                // Implement the Blockless SDK link
-                let opts = HttpOptions::new("GET", 30, 10);
-                let http = BlocklessHttp::open(&url, &opts);
-                let http = http.unwrap();
-                let body = http.get_all_body().unwrap();
-                let body = String::from_utf8(body).unwrap();
-                let data = match json::parse(&body).unwrap() {
-                    json::JsonValue::Object(o) => o,
-                    _ => panic!("must be object"),
-                };
-                
-                println!("Http Data: {:?}", data);
-                
-                Ok(JSValue::Undefined)
-            })?,
+            "__javy_fetchio_request",
+            context.wrap_callback(fetchio_request())?,
         )?;
 
         context.eval_global("fetch.js", include_str!("fetch.js"))?;
@@ -56,25 +25,28 @@ impl JSApiSet for FetchIO {
     }
 }
 
-// Automated tests are highly recommended
-#[cfg(test)]
-mod tests {
-    use std::env;
+fn fetchio_request() -> impl FnMut(&JSContextRef, JSValueRef, &[JSValueRef]) -> anyhow::Result<JSValue> {
+    move |_ctx: &JSContextRef, _this: JSValueRef, args: &[JSValueRef]| {
+        if args.len() != 4 {
+            return Err(anyhow!("Expecting 4 arguments, received {}", args.len()));
+        }
 
-    use crate::{APIConfig, JSApiSet};
-    use anyhow::Result;
-    use javy::Runtime;
+        let url: String = args[0].try_into()?;
+        let buffer: Vec<u8> = args[1].try_into()?;
+        let byte_offset: usize = args[2].try_into()?;
+        let byte_length: usize = args[3].try_into()?;
 
-    use super::FetchIO;
+        let sliced_buffer: &[u8] = &buffer[byte_offset..(byte_offset + byte_length)];
+        let request_obj: Value = from_slice(sliced_buffer)?;
 
-    #[test]
-    fn test_print_env_var() -> Result<()> {
-        let runtime = Runtime::default();
-        let context = runtime.context();
-        FetchIO.register(&runtime, &APIConfig::default())?;
-        env::set_var("HELLO", "there");
-        let _ = context.eval_global("main", "Javy.Env.print('HELLO');")?;
-        env::remove_var("HELLO");
-        Ok(())
+        // @TODO: Call host API methods here
+        println!("{:?}", url);
+        println!("{:?}", request_obj);
+
+        // Prepare Response
+        let mut response: HashMap<String, JSValue> = HashMap::new();
+        response.insert("ok".to_string(), JSValue::Bool(true));
+
+        Ok(JSValue::Object(response))
     }
 }

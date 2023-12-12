@@ -1461,12 +1461,12 @@ dependencies = [
  "blockless-sdk",
  "fastrand",
  "javy",
- "json",
+ "serde_json",
 ]
 
 [[package]]
 name = "javy-cli"
-version = "1.2.0"
+version = "1.3.0"
 dependencies = [
  "anyhow",
  "binaryen",
