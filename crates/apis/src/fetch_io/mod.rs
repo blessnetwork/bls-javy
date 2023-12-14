@@ -66,6 +66,7 @@ fn fetchio_request() -> impl FnMut(&JSContextRef, JSValueRef, &[JSValueRef]) -> 
         if cfg!(feature = "runtime_bls") {
             let http = BlocklessHttp::open(&url, &request_obj).unwrap();
             let body = String::from_utf8(http.get_all_body().unwrap()).unwrap();
+            http.close();
 
             response.insert("ok".to_string(), JSValue::Bool(true));
             response.insert("body".to_string(), JSValue::String(body));

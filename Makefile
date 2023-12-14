@@ -15,7 +15,7 @@ cli: core
 	CARGO_PROFILE_RELEASE_LTO=off cargo build --package=javy-cli --release
 
 core:
-	cargo build --package=javy-core --release --target=wasm32-wasi --features=experimental_event_loop
+	cargo build --package=javy-core --release --target=wasm32-wasi --features=experimental_event_loop,runtime_bls
 
 docs:
 	cargo doc --package=javy-cli --open
