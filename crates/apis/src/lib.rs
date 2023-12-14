@@ -62,6 +62,8 @@ mod stream_io;
 mod text_encoding;
 #[cfg(feature = "fetch_io")]
 mod fetch_io;
+#[cfg(feature = "crypto")]
+mod crypto;
 
 pub(crate) trait JSApiSet {
     fn register(&self, runtime: &Runtime, config: &APIConfig) -> Result<()>;
@@ -89,5 +91,7 @@ pub fn add_to_runtime(runtime: &Runtime, config: APIConfig) -> Result<()> {
     text_encoding::TextEncoding.register(runtime, &config)?;
     #[cfg(feature = "fetch_io")]
     fetch_io::FetchIO.register(runtime, &config)?;
+    #[cfg(feature = "crypto")]
+    crypto::Crypto.register(runtime, &config)?;
     Ok(())
 }
