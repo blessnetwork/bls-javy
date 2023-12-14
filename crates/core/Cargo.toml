@@ -21,3 +21,4 @@ once_cell = { workspace = true }
 
 [features]
 experimental_event_loop = []
+runtime_bls = ["javy-apis/runtime_bls"]

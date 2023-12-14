@@ -16,6 +16,7 @@ fetch_io = ["dep:serde", "dep:serde_json"]
 random = ["dep:fastrand"]
 stream_io = []
 text_encoding = []
+runtime_bls = []
 
 [dependencies]
 javy = { workspace = true }

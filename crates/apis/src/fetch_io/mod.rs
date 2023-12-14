@@ -59,14 +59,20 @@ fn fetchio_request() -> impl FnMut(&JSContextRef, JSValueRef, &[JSValueRef]) -> 
         let sliced_buffer: &[u8] = &buffer[byte_offset..(byte_offset + byte_length)];
         let request_obj: FetchOptions = from_slice(sliced_buffer)?;
 
-        // TODO: Conditional runtime switch
-        let http = BlocklessHttp::open(&url, &request_obj).unwrap();
-        let body = String::from_utf8(http.get_all_body().unwrap()).unwrap();
-
         // Prepare Response
         let mut response: HashMap<String, JSValue> = HashMap::new();
-        response.insert("ok".to_string(), JSValue::Bool(true));
-        response.insert("body".to_string(), JSValue::String(body));
+
+        // Conditionally invoke the runtime host call
+        if cfg!(feature = "runtime_bls") {
+            let http = BlocklessHttp::open(&url, &request_obj).unwrap();
+            let body = String::from_utf8(http.get_all_body().unwrap()).unwrap();
+
+            response.insert("ok".to_string(), JSValue::Bool(true));
+            response.insert("body".to_string(), JSValue::String(body));
+        } else {
+            response.insert("ok".to_string(), JSValue::Bool(false));
+            response.insert("body".to_string(), JSValue::String(String::from("{}")));
+        }
 
         Ok(JSValue::Object(response))
     }
