@@ -25,8 +25,6 @@ impl JSApiSet for Crypto {
 
 fn get_random_values() -> impl FnMut(&JSContextRef, JSValueRef, &[JSValueRef]) -> Result<JSValue> {
     move |_ctx: &JSContextRef, _this: JSValueRef, args: &[JSValueRef]| {
-        let mut rng = rand::rngs::OsRng::default();
-
         let buffer = args[0].as_bytes_mut()?;
         let byte_offset: usize = args[1].try_into()?;
         let byte_length: usize = args[2].try_into()?;
@@ -34,7 +32,7 @@ fn get_random_values() -> impl FnMut(&JSContextRef, JSValueRef, &[JSValueRef]) -
         let buffer = &mut buffer[byte_offset..(byte_offset + byte_length)];
 
         // Fill the buffer with random values.
-        rng.fill_bytes(buffer);
+        rand::rngs::OsRng.fill_bytes(buffer);
 
         Ok(JSValue::ArrayBuffer(buffer.to_vec()))
     }

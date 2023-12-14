@@ -1,19 +1,39 @@
+mod blockless;
+
 use std::collections::HashMap;
 use anyhow::{anyhow, Result};
 use javy::{quickjs::JSValue, Runtime};
-use serde_json::{Value, from_slice};
+use serde_json::{from_slice};
+use serde::{Deserialize, Serialize};
 
 use crate::{APIConfig, JSApiSet};
 use javy::quickjs::{JSContextRef, JSValueRef};
+use crate::fetch_io::blockless::BlocklessHttp;
 
 pub(super) struct FetchIO;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct FetchOptions {
+    method: String,
+}
+
+impl FetchOptions {
+    pub fn new(method: &str) -> Self {
+        FetchOptions {
+            method: method.into()
+        }
+    }
+
+    pub fn to_string(&self) -> String {
+        serde_json::to_string(&self).unwrap()
+    }
+}
 
 impl JSApiSet for FetchIO {
     fn register(&self, runtime: &Runtime, _config: &APIConfig) -> Result<()> {
         let context = runtime.context();
         let global = context.global_object()?;
 
-        // `wrap_callback`` has a static lifetime so you can't use references to the config in its body.
         global.set_property(
             "__javy_fetchio_request",
             context.wrap_callback(fetchio_request())?,
@@ -37,15 +57,16 @@ fn fetchio_request() -> impl FnMut(&JSContextRef, JSValueRef, &[JSValueRef]) -> 
         let byte_length: usize = args[3].try_into()?;
 
         let sliced_buffer: &[u8] = &buffer[byte_offset..(byte_offset + byte_length)];
-        let request_obj: Value = from_slice(sliced_buffer)?;
+        let request_obj: FetchOptions = from_slice(sliced_buffer)?;
 
-        // @TODO: Call host API methods here
-        println!("{:?}", url);
-        println!("{:?}", request_obj);
+        // TODO: Conditional runtime switch
+        let http = BlocklessHttp::open(&url, &request_obj).unwrap();
+        let body = String::from_utf8(http.get_all_body().unwrap()).unwrap();
 
         // Prepare Response
         let mut response: HashMap<String, JSValue> = HashMap::new();
         response.insert("ok".to_string(), JSValue::Bool(true));
+        response.insert("body".to_string(), JSValue::String(body));
 
         Ok(JSValue::Object(response))
     }

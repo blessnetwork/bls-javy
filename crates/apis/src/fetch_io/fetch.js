@@ -10,17 +10,18 @@
         const responseObj = __javy_fetchio_request(url, data.buffer, data.byteOffset, data.byteLength);
 
         // @TODO: Capture all response data from response object
-        const responseOk = true;
+        const responseOk = responseObj.ok;
         const responseHeaders = {};
+        const responseBody = responseObj.body;
 
         return new Promise((resolve, reject) => {
             const response = {
                 url,
                 headers: responseHeaders,
                 ok: responseOk,
-                type: typeof responseObj === 'string' ? 'text' : 'json',
-                text: () => typeof responseObj === 'string' ? responseObj : JSON.stringify(responseObj),
-                json: () => typeof responseObj !== 'string' ? responseObj : JSON.parse(responseObj),
+                type: typeof responseBody === 'string' ? 'text' : 'json',
+                text: () => typeof responseBody === 'string' ? responseBody : JSON.stringify(responseBody),
+                json: () => typeof responseBody !== 'string' ? responseBody : JSON.parse(responseBody),
             };
 
             resolve(response);
