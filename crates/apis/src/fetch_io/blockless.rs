@@ -43,7 +43,7 @@ impl BlocklessHttp {
     pub fn open(url: &str, opts: &FetchOptions) -> Result<Self, HttpErrorKind> {
         let http_opts = HttpOptions::new(&opts.method, 30, 10);
         let http_opts_str = serde_json::to_string(&http_opts.to_json()).unwrap();
-        
+
         let mut fd = 0;
         let mut status = 0;
         let rs = unsafe {
@@ -76,13 +76,16 @@ impl BlocklessHttp {
             let mut num: u32 = 0;
             let rs =
                 unsafe { http_read_body(self.inner, buf.as_mut_ptr(), buf.len() as _, &mut num) };
-            if rs != 0 {
-                return Err(HttpErrorKind::from(rs));
-            }
 
-            match num.cmp(&0) {
-                Ordering::Greater => vec.extend_from_slice(&buf[0..num as _]),
-                _ => break,
+            if rs == u32::MAX {
+                continue;
+            } else if rs != 0 {
+                return Err(HttpErrorKind::from(rs));
+            } else {
+                match num.cmp(&0) {
+                    Ordering::Greater => vec.extend_from_slice(&buf[0..num as _]),
+                    _ => break,
+                }
             }
         }
         Ok(vec)
@@ -103,12 +106,16 @@ impl BlocklessHttp {
                     &mut num,
                 )
             };
-            if rs != 0 {
+
+            if rs == u32::MAX {
+                continue;
+            } else if rs != 0 {
                 return Err(HttpErrorKind::from(rs));
-            }
-            match num.cmp(&0) {
-                Ordering::Greater => vec.extend_from_slice(&buf[0..num as _]),
-                _ => break,
+            } else {
+                match num.cmp(&0) {
+                    Ordering::Greater => vec.extend_from_slice(&buf[0..num as _]),
+                    _ => break,
+                }
             }
         }
         String::from_utf8(vec).map_err(|_| HttpErrorKind::Utf8Error)
