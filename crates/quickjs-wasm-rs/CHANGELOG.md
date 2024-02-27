@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [3.0.0] - 2024-01-31
+
 ### Changed
+
 - Make `JSContextRef::wrap_rust_value` private. Similar to
   `context::get_rust_value` this function is simply an internal detail.
+- Updated to 2023-12-09 release of QuickJS.
 
 ## [2.0.1] - 2023-09-11
 

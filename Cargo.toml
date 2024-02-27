@@ -10,18 +10,19 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "1.3.0"
+version = "1.4.0"
 authors = ["The Javy Project Developers"]
 edition = "2021"
 license = "Apache-2.0 WITH LLVM-exception"
 
 [workspace.dependencies]
-wasmtime = "9.0"
-wasmtime-wasi = "9.0"
-wasi-common = "9.0"
+wizer = "4.0.0"
+wasmtime = "16"
+wasmtime-wasi = "16"
+wasi-common = "16"
 anyhow = "1.0"
-once_cell = "1.16"
-javy = { path = "crates/javy", version = "2.1.1-alpha.1" }
+once_cell = "1.19"
+javy = { path = "crates/javy", version = "2.2.1-alpha.1" }
 
 [profile.release]
 lto = false
