@@ -199,9 +199,9 @@ fn create_wasm_env(
     let mut linker = Linker::new(&engine);
     wasmtime_wasi::add_to_linker(&mut linker, |s| s)?;
     let wasi = if is_stderr {
-        WasiCtxBuilder::new().stderr(Box::new(stderr)).build();
+        WasiCtxBuilder::new().stderr(Box::new(stderr)).build()
     } else {
-        WasiCtxBuilder::new().stdout(Box::new(stderr)).build();
+        WasiCtxBuilder::new().stdout(Box::new(stderr)).build()
     };
     let store = Store::new(&engine, wasi);
     Ok((engine, linker, store))
