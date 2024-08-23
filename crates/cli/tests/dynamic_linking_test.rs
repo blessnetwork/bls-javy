@@ -28,7 +28,8 @@ pub fn test_dynamic_linking_with_func() -> Result<()> {
             export foo-bar: func()
         }
     ";
-    let log_output = invoke_fn_on_generated_module(js_src, "foo-bar", Some((wit, "foo-test")), false)?;
+    let log_output =
+        invoke_fn_on_generated_module(js_src, "foo-bar", Some((wit, "foo-test")), false)?;
     assert_eq!("Toplevel\nIn foo\n", &log_output);
     Ok(())
 }

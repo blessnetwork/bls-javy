@@ -46,7 +46,11 @@ fn test_dylib_with_exported_func() -> Result<()> {
     Ok(())
 }
 
-fn run_js_src<T: WasiFile + Clone + 'static>(js_src: &str, stderr: &T, is_stderr: bool) -> Result<()> {
+fn run_js_src<T: WasiFile + Clone + 'static>(
+    js_src: &str,
+    stderr: &T,
+    is_stderr: bool,
+) -> Result<()> {
     let (instance, mut store) = create_wasm_env(stderr, is_stderr)?;
 
     let eval_bytecode_func =
@@ -55,7 +59,6 @@ fn run_js_src<T: WasiFile + Clone + 'static>(js_src: &str, stderr: &T, is_stderr
     eval_bytecode_func.call(&mut store, (bytecode_ptr, bytecode_len))?;
     Ok(())
 }
-
 
 fn run_invoke<T: WasiFile + Clone + 'static>(
     js_src: &str,
@@ -83,12 +86,12 @@ fn create_wasm_env<T: WasiFile + Clone + 'static>(
     wasmtime_wasi::add_to_linker(&mut linker, |s| s)?;
     let wasi = if is_stderr {
         WasiCtxBuilder::new()
-        .stderr(Box::new(stderr.clone()))
-        .build()
+            .stderr(Box::new(stderr.clone()))
+            .build()
     } else {
         WasiCtxBuilder::new()
-        .stdout(Box::new(stderr.clone()))
-        .build()
+            .stdout(Box::new(stderr.clone()))
+            .build()
     };
     let module = common::create_quickjs_provider_module(&engine)?;
 
