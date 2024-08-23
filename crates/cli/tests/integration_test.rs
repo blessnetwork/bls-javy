@@ -62,7 +62,9 @@ fn test_encoding() {
 fn test_logging() {
     let mut runner = Runner::new("logging.js");
 
-    let (output, _logs, fuel_consumed) = run_fn_stdout(&mut runner, "_start", &[]);
+    let (output, logs, fuel_consumed) = run_fn(&mut runner, "_start", &[]);
+    let mut output = String::from_utf8(output).unwrap();
+    output.push_str(&logs);
     assert_eq!(
         "hello world from console.log\nhello world from console.error\n",
         output.as_str(),
@@ -107,7 +109,7 @@ fn test_exported_functions() {
     let (logs, _, fuel_consumed) = run_fn_stdout(&mut runner, "foo", &[]);
     assert_eq!("Hello from top-level\nHello from foo\n", logs);
     assert_fuel_consumed_within_threshold(54610, fuel_consumed);
-    let (_, logs, _) = run_fn(&mut runner, "foo-bar", &[]);
+    let (logs, _, _) = run_fn_stdout(&mut runner, "foo-bar", &[]);
     assert_eq!("Hello from top-level\nHello from fooBar\n", logs);
 }
 
