@@ -80,7 +80,7 @@ fn create_wasm_env<T: WasiFile + Clone + 'static>(
     let mut linker = Linker::new(&engine);
     wasmtime_wasi::add_to_linker(&mut linker, |s| s)?;
     let wasi = WasiCtxBuilder::new()
-        .stderr(Box::new(stderr.clone()))
+        .stdout(Box::new(stderr.clone()))
         .build();
     let module = common::create_quickjs_provider_module(&engine)?;
 
