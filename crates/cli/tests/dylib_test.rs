@@ -23,7 +23,7 @@ fn test_dylib() -> Result<()> {
 fn test_dylib_with_error() -> Result<()> {
     let js_src = "function foo() { throw new Error('foo error'); } foo();";
     let stderr = WritePipe::new_in_memory();
-    let result = run_js_src(js_src, &stderr, false);
+    let result = run_js_src(js_src, &stderr, true);
 
     assert!(result.is_err());
     let output = stderr.try_into_inner().unwrap().into_inner();
