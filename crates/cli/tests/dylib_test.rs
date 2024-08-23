@@ -40,7 +40,7 @@ fn test_dylib_with_exported_func() -> Result<()> {
     let stdout = WritePipe::new_in_memory();
     run_invoke(js_src, "foo", &stdout)?;
 
-    let output = stderr.try_into_inner().unwrap().into_inner();
+    let output = stdout.try_into_inner().unwrap().into_inner();
     assert_eq!("Toplevel\nIn foo\n", str::from_utf8(&output)?);
 
     Ok(())
