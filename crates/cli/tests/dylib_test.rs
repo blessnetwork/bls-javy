@@ -11,7 +11,7 @@ mod common;
 fn test_dylib() -> Result<()> {
     let js_src = "console.log(42);";
     let stderr = WritePipe::new_in_memory();
-    run_js_src_stdout(js_src, &stderr)?;
+    run_js_src(js_src, &stderr, false)?;
 
     let output = stderr.try_into_inner().unwrap().into_inner();
     assert_eq!("42\n", str::from_utf8(&output)?);
@@ -23,7 +23,7 @@ fn test_dylib() -> Result<()> {
 fn test_dylib_with_error() -> Result<()> {
     let js_src = "function foo() { throw new Error('foo error'); } foo();";
     let stderr = WritePipe::new_in_memory();
-    let result = run_js_src(js_src, &stderr);
+    let result = run_js_src(js_src, &stderr, false);
 
     assert!(result.is_err());
     let output = stderr.try_into_inner().unwrap().into_inner();
@@ -46,8 +46,8 @@ fn test_dylib_with_exported_func() -> Result<()> {
     Ok(())
 }
 
-fn run_js_src<T: WasiFile + Clone + 'static>(js_src: &str, stderr: &T) -> Result<()> {
-    let (instance, mut store) = create_wasm_env(stderr)?;
+fn run_js_src<T: WasiFile + Clone + 'static>(js_src: &str, stderr: &T, is_stderr: bool) -> Result<()> {
+    let (instance, mut store) = create_wasm_env(stderr, is_stderr)?;
 
     let eval_bytecode_func =
         instance.get_typed_func::<(u32, u32), ()>(&mut store, "eval_bytecode")?;
@@ -56,22 +56,13 @@ fn run_js_src<T: WasiFile + Clone + 'static>(js_src: &str, stderr: &T) -> Result
     Ok(())
 }
 
-fn run_js_src_stdout<T: WasiFile + Clone + 'static>(js_src: &str, stderr: &T) -> Result<()> {
-    let (instance, mut store) = create_wasm_env_stdout(stderr)?;
-
-    let eval_bytecode_func =
-        instance.get_typed_func::<(u32, u32), ()>(&mut store, "eval_bytecode")?;
-    let (bytecode_ptr, bytecode_len) = compile_src(js_src.as_bytes(), &instance, &mut store)?;
-    eval_bytecode_func.call(&mut store, (bytecode_ptr, bytecode_len))?;
-    Ok(())
-}
 
 fn run_invoke<T: WasiFile + Clone + 'static>(
     js_src: &str,
     fn_to_invoke: &str,
     stdout: &T,
 ) -> Result<()> {
-    let (instance, mut store) = create_wasm_env_stdout(stdout)?;
+    let (instance, mut store) = create_wasm_env(stdout, false)?;
 
     let invoke_func = instance.get_typed_func::<(u32, u32, u32, u32), ()>(&mut store, "invoke")?;
     let (bytecode_ptr, bytecode_len) = compile_src(js_src.as_bytes(), &instance, &mut store)?;
@@ -83,32 +74,22 @@ fn run_invoke<T: WasiFile + Clone + 'static>(
     Ok(())
 }
 
-fn create_wasm_env_stdout<T: WasiFile + Clone + 'static>(
-    stderr: &T,
-) -> Result<(Instance, Store<WasiCtx>)> {
-    let engine = Engine::default();
-    let mut linker = Linker::new(&engine);
-    wasmtime_wasi::add_to_linker(&mut linker, |s| s)?;
-    let wasi = WasiCtxBuilder::new()
-        .stdout(Box::new(stderr.clone()))
-        .build();
-    let module = common::create_quickjs_provider_module(&engine)?;
-
-    let mut store = Store::new(&engine, wasi);
-    let instance = linker.instantiate(&mut store, &module)?;
-
-    Ok((instance, store))
-}
-
 fn create_wasm_env<T: WasiFile + Clone + 'static>(
     stderr: &T,
+    is_stderr: bool,
 ) -> Result<(Instance, Store<WasiCtx>)> {
     let engine = Engine::default();
     let mut linker = Linker::new(&engine);
     wasmtime_wasi::add_to_linker(&mut linker, |s| s)?;
-    let wasi = WasiCtxBuilder::new()
+    let wasi = if is_stderr {
+        WasiCtxBuilder::new()
         .stderr(Box::new(stderr.clone()))
-        .build();
+        .build()
+    } else {
+        WasiCtxBuilder::new()
+        .stdout(Box::new(stderr.clone()))
+        .build()
+    };
     let module = common::create_quickjs_provider_module(&engine)?;
 
     let mut store = Store::new(&engine, wasi);
