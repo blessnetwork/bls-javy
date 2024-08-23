@@ -38,7 +38,7 @@ fn test_dylib_with_error() -> Result<()> {
 fn test_dylib_with_exported_func() -> Result<()> {
     let js_src = "export function foo() { console.log('In foo'); }; console.log('Toplevel');";
     let stderr = WritePipe::new_in_memory();
-    run_invoke(js_src, "foo", &stderr)?;
+    run_invoke_stdout(js_src, "foo", &stderr)?;
 
     let output = stderr.try_into_inner().unwrap().into_inner();
     assert_eq!("Toplevel\nIn foo\n", str::from_utf8(&output)?);
@@ -53,6 +53,23 @@ fn run_js_src<T: WasiFile + Clone + 'static>(js_src: &str, stderr: &T) -> Result
         instance.get_typed_func::<(u32, u32), ()>(&mut store, "eval_bytecode")?;
     let (bytecode_ptr, bytecode_len) = compile_src(js_src.as_bytes(), &instance, &mut store)?;
     eval_bytecode_func.call(&mut store, (bytecode_ptr, bytecode_len))?;
+    Ok(())
+}
+
+fn run_invoke_stdout<T: WasiFile + Clone + 'static>(
+    js_src: &str,
+    fn_to_invoke: &str,
+    stdout: &T,
+) -> Result<()> {
+    let (instance, mut store) = create_wasm_env_stdout(stdout)?;
+
+    let invoke_func = instance.get_typed_func::<(u32, u32, u32, u32), ()>(&mut store, "invoke")?;
+    let (bytecode_ptr, bytecode_len) = compile_src(js_src.as_bytes(), &instance, &mut store)?;
+    let (fn_name_ptr, fn_name_len) = copy_func_name(fn_to_invoke, &instance, &mut store)?;
+    invoke_func.call(
+        &mut store,
+        (bytecode_ptr, bytecode_len, fn_name_ptr, fn_name_len),
+    )?;
     Ok(())
 }
 
@@ -73,6 +90,23 @@ fn run_invoke<T: WasiFile + Clone + 'static>(
     Ok(())
 }
 
+fn create_wasm_env_stdout<T: WasiFile + Clone + 'static>(
+    stderr: &T,
+) -> Result<(Instance, Store<WasiCtx>)> {
+    let engine = Engine::default();
+    let mut linker = Linker::new(&engine);
+    wasmtime_wasi::add_to_linker(&mut linker, |s| s)?;
+    let wasi = WasiCtxBuilder::new()
+        .stderr(Box::new(stderr.clone()))
+        .build();
+    let module = common::create_quickjs_provider_module(&engine)?;
+
+    let mut store = Store::new(&engine, wasi);
+    let instance = linker.instantiate(&mut store, &module)?;
+
+    Ok((instance, store))
+}
+
 fn create_wasm_env<T: WasiFile + Clone + 'static>(
     stderr: &T,
 ) -> Result<(Instance, Store<WasiCtx>)> {
@@ -80,7 +114,7 @@ fn create_wasm_env<T: WasiFile + Clone + 'static>(
     let mut linker = Linker::new(&engine);
     wasmtime_wasi::add_to_linker(&mut linker, |s| s)?;
     let wasi = WasiCtxBuilder::new()
-        .stdout(Box::new(stderr.clone()))
+        .stderr(Box::new(stderr.clone()))
         .build();
     let module = common::create_quickjs_provider_module(&engine)?;
 
