@@ -101,6 +101,7 @@ fn create_wasm_env<T: WasiFile + Clone + 'static>(
     Ok((instance, store))
 }
 
+#[allow(clippy::needless_borrows_for_generic_args)]
 fn compile_src(
     js_src: &[u8],
     instance: &Instance,
@@ -121,6 +122,7 @@ fn compile_src(
     Ok((bytecode_ptr, bytecode_len))
 }
 
+#[allow(clippy::needless_borrows_for_generic_args)]
 fn copy_func_name(
     fn_name: &str,
     instance: &Instance,
@@ -134,6 +136,7 @@ fn copy_func_name(
     Ok((fn_name_ptr, fn_name_bytes.len().try_into()?))
 }
 
+#[allow(clippy::needless_borrows_for_generic_args)]
 fn allocate_memory(
     instance: &Instance,
     mut store: &mut Store<WasiCtx>,
