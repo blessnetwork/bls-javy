@@ -11,7 +11,7 @@ mod common;
 fn test_dylib() -> Result<()> {
     let js_src = "console.log(42);";
     let stderr = WritePipe::new_in_memory();
-    run_js_src(js_src, &stderr)?;
+    run_js_src_stdout(js_src, &stderr)?;
 
     let output = stderr.try_into_inner().unwrap().into_inner();
     assert_eq!("42\n", str::from_utf8(&output)?);
@@ -37,8 +37,8 @@ fn test_dylib_with_error() -> Result<()> {
 #[test]
 fn test_dylib_with_exported_func() -> Result<()> {
     let js_src = "export function foo() { console.log('In foo'); }; console.log('Toplevel');";
-    let stderr = WritePipe::new_in_memory();
-    run_invoke_stdout(js_src, "foo", &stderr)?;
+    let stdout = WritePipe::new_in_memory();
+    run_invoke(js_src, "foo", &stdout)?;
 
     let output = stderr.try_into_inner().unwrap().into_inner();
     assert_eq!("Toplevel\nIn foo\n", str::from_utf8(&output)?);
@@ -56,29 +56,22 @@ fn run_js_src<T: WasiFile + Clone + 'static>(js_src: &str, stderr: &T) -> Result
     Ok(())
 }
 
-fn run_invoke_stdout<T: WasiFile + Clone + 'static>(
-    js_src: &str,
-    fn_to_invoke: &str,
-    stdout: &T,
-) -> Result<()> {
-    let (instance, mut store) = create_wasm_env_stdout(stdout)?;
+fn run_js_src_stdout<T: WasiFile + Clone + 'static>(js_src: &str, stderr: &T) -> Result<()> {
+    let (instance, mut store) = create_wasm_env_stdout(stderr)?;
 
-    let invoke_func = instance.get_typed_func::<(u32, u32, u32, u32), ()>(&mut store, "invoke")?;
+    let eval_bytecode_func =
+        instance.get_typed_func::<(u32, u32), ()>(&mut store, "eval_bytecode")?;
     let (bytecode_ptr, bytecode_len) = compile_src(js_src.as_bytes(), &instance, &mut store)?;
-    let (fn_name_ptr, fn_name_len) = copy_func_name(fn_to_invoke, &instance, &mut store)?;
-    invoke_func.call(
-        &mut store,
-        (bytecode_ptr, bytecode_len, fn_name_ptr, fn_name_len),
-    )?;
+    eval_bytecode_func.call(&mut store, (bytecode_ptr, bytecode_len))?;
     Ok(())
 }
 
 fn run_invoke<T: WasiFile + Clone + 'static>(
     js_src: &str,
     fn_to_invoke: &str,
-    stderr: &T,
+    stdout: &T,
 ) -> Result<()> {
-    let (instance, mut store) = create_wasm_env(stderr)?;
+    let (instance, mut store) = create_wasm_env_stdout(stdout)?;
 
     let invoke_func = instance.get_typed_func::<(u32, u32, u32, u32), ()>(&mut store, "invoke")?;
     let (bytecode_ptr, bytecode_len) = compile_src(js_src.as_bytes(), &instance, &mut store)?;
