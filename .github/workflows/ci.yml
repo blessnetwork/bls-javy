@@ -20,7 +20,7 @@ jobs:
 
       - uses: ./.github/actions/ci-shared-setup
         with:
-          os: Ubuntu
+          os: linux
 
       - name: Install cargo-wasi
         run: cargo install cargo-wasi
