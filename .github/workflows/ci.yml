@@ -14,13 +14,13 @@ jobs:
     # which is built on the latest macOS too.
     # This is also helpful for testing fuel
     # consumption in tests.
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - uses: ./.github/actions/ci-shared-setup
         with:
-          os: macos
+          os: Ubuntu
 
       - name: Install cargo-wasi
         run: cargo install cargo-wasi
