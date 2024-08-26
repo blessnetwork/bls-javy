@@ -26,6 +26,7 @@ fn create_wasm_env() -> Result<(Store<WasiCtx>, Instance, Memory)> {
     Ok((store, instance, memory))
 }
 
+#[allow(clippy::needless_borrows_for_generic_args)]
 fn copy_source_code_into_instance(
     js_source_code: &[u8],
     mut store: &mut Store<WasiCtx>,
