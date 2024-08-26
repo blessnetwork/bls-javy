@@ -49,6 +49,7 @@ fn copy_source_code_into_instance(
     Ok((js_source_ptr, js_src_len))
 }
 
+#[allow(clippy::needless_borrows_for_generic_args)]
 fn call_compile(
     js_src_ptr: u32,
     js_src_len: u32,
@@ -62,6 +63,7 @@ fn call_compile(
     Ok(ret_ptr)
 }
 
+#[allow(clippy::needless_borrows_for_generic_args)]
 fn copy_bytecode_from_instance(
     ret_ptr: u32,
     mut store: &mut Store<WasiCtx>,
