@@ -32,7 +32,12 @@ jobs:
         run: cargo build -p javy-core --release --target=wasm32-wasi
 
       - name: Test
-        run: cargo hack wasi test --workspace --exclude=javy-cli --each-feature -- --nocapture
+        run: |
+          cargo wasi test --manifest-path crates/quickjs-wasm-rs/Cargo.toml --all-features -- --nocapture
+          cargo wasi test --manifest-path crates/apis/Cargo.toml --all-features -- --nocapture
+          cargo wasi test --manifest-path crates/quickjs-wasm-sys/Cargo.toml --all-features -- --nocapture
+          cargo wasi test --manifest-path crates/javy/Cargo.toml --all-features -- --nocapture
+
 
       - name: Lint
         run: cargo clippy --workspace --exclude=javy-cli --target=wasm32-wasi --all-targets -- -D warnings
