@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 mod blockless;
 
 use std::collections::HashMap;
@@ -23,11 +24,13 @@ impl FetchOptions {
             method: method.into()
         }
     }
-
+    
+    #[allow(clippy::inherent_to_string)]
     pub fn to_string(&self) -> String {
         serde_json::to_string(&self).unwrap()
     }
 }
+
 
 impl JSApiSet for FetchIO {
     fn register(&self, runtime: &Runtime, _config: &APIConfig) -> Result<()> {

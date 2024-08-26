@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::cmp::Ordering;
 use serde_json::{json, Value};
 use crate::fetch_io::FetchOptions;
