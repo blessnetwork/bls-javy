@@ -1,6 +1,7 @@
-use std::cmp::Ordering;
-use serde_json::{json, Value};
+#![allow(dead_code)]
 use crate::fetch_io::FetchOptions;
+use serde_json::{json, Value};
+use std::cmp::Ordering;
 
 pub type Handle = u32;
 

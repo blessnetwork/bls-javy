@@ -48,11 +48,16 @@ use javy::Runtime;
 pub use api_config::APIConfig;
 #[cfg(feature = "console")]
 pub use console::LogStream;
+
 pub use runtime_ext::RuntimeExt;
 
 mod api_config;
 #[cfg(feature = "console")]
 mod console;
+#[cfg(feature = "crypto")]
+mod crypto;
+#[cfg(feature = "fetch_io")]
+mod fetch_io;
 #[cfg(feature = "random")]
 mod random;
 mod runtime_ext;
@@ -60,10 +65,6 @@ mod runtime_ext;
 mod stream_io;
 #[cfg(feature = "text_encoding")]
 mod text_encoding;
-#[cfg(feature = "fetch_io")]
-mod fetch_io;
-#[cfg(feature = "crypto")]
-mod crypto;
 
 pub(crate) trait JSApiSet {
     fn register(&self, runtime: &Runtime, config: &APIConfig) -> Result<()>;

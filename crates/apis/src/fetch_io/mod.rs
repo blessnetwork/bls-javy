@@ -1,14 +1,15 @@
+#![allow(dead_code)]
 mod blockless;
 
-use std::collections::HashMap;
 use anyhow::{anyhow, Result};
 use javy::{quickjs::JSValue, Runtime};
-use serde_json::{from_slice};
 use serde::{Deserialize, Serialize};
+use serde_json::from_slice;
+use std::collections::HashMap;
 
+use crate::fetch_io::blockless::BlocklessHttp;
 use crate::{APIConfig, JSApiSet};
 use javy::quickjs::{JSContextRef, JSValueRef};
-use crate::fetch_io::blockless::BlocklessHttp;
 
 pub(super) struct FetchIO;
 
@@ -20,10 +21,11 @@ pub struct FetchOptions {
 impl FetchOptions {
     pub fn new(method: &str) -> Self {
         FetchOptions {
-            method: method.into()
+            method: method.into(),
         }
     }
 
+    #[allow(clippy::inherent_to_string)]
     pub fn to_string(&self) -> String {
         serde_json::to_string(&self).unwrap()
     }
@@ -45,7 +47,8 @@ impl JSApiSet for FetchIO {
     }
 }
 
-fn fetchio_request() -> impl FnMut(&JSContextRef, JSValueRef, &[JSValueRef]) -> anyhow::Result<JSValue> {
+fn fetchio_request(
+) -> impl FnMut(&JSContextRef, JSValueRef, &[JSValueRef]) -> anyhow::Result<JSValue> {
     move |_ctx: &JSContextRef, _this: JSValueRef, args: &[JSValueRef]| {
         if args.len() != 4 {
             return Err(anyhow!("Expecting 4 arguments, received {}", args.len()));
