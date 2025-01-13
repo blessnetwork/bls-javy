@@ -1,0 +1,16 @@
+[package]
+name = "javy-plugin"
+version = "0.2.0"
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "plugin"
+crate-type = ["cdylib"]
+
+[dependencies]
+anyhow = { workspace = true }
+javy-plugin-api = { path = "../plugin-api", features = ["json"] }
+serde = { workspace = true }
+serde_json = { workspace = true }

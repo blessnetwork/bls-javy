@@ -1,4 +1,4 @@
-.PHONY: cli core test fmt clean
+.PHONY: cli plugin test fmt clean
 .DEFAULT_GOAL := cli
 
 install:
@@ -11,76 +11,60 @@ check-bench:
 	CARGO_PROFILE_RELEASE_LTO=off cargo check --package=javy-cli --release --benches
 
 # Disabling LTO substantially improves compile time
-cli: core
+cli: plugin
 	CARGO_PROFILE_RELEASE_LTO=off cargo build --package=javy-cli --release
 
-core:
-	cargo build --package=javy-core --release --target=wasm32-wasi --features=$(CORE_FEATURES)
+plugin:
+	cargo build --package=javy-plugin --release --target=wasm32-wasip1 --features=$(PLUGIN_FEATURES)
+
+build-test-plugin: cli
+	cargo build --package=javy-test-plugin --release --target=wasm32-wasip1
+	target/release/javy init-plugin target/wasm32-wasip1/release/test_plugin.wasm -o crates/runner/test_plugin.wasm
 
 docs:
 	cargo doc --package=javy-cli --open
-	cargo doc --package=javy-core --open --target=wasm32-wasi
-
-test-quickjs-wasm-rs:
-	cargo wasi test --package=quickjs-wasm-rs -- --nocapture
+	cargo doc --package=javy-plugin --open --target=wasm32-wasip1
 
 test-javy:
-	cargo wasi test --package=javy --features json,messagepack -- --nocapture
+	CARGO_TARGET_WASM32_WASIP1_RUNNER="wasmtime --dir=." cargo hack test --package=javy --target=wasm32-wasip1 --each-feature -- --nocapture
 
-test-apis:
-	cargo hack wasi test --package=javy-apis --each-feature -- --nocapture
+test-plugin-api:
+	CARGO_TARGET_WASM32_WASIP1_RUNNER="wasmtime --dir=." cargo hack test --package=javy-plugin-api --target=wasm32-wasip1 --each-feature -- --nocapture
 
-test-core:
-	cargo wasi test --package=javy-core -- --nocapture
+test-plugin:
+	CARGO_TARGET_WASM32_WASIP1_RUNNER="wasmtime" cargo test --package=javy-plugin --target=wasm32-wasip1 -- --nocapture
 
 # Test in release mode to skip some debug assertions
 # Note: to make this faster, the engine should be optimized beforehand (wasm-strip + wasm-opt).
 # Disabling LTO substantially improves compile time
-test-cli: core
+test-cli: plugin build-test-plugin
 	CARGO_PROFILE_RELEASE_LTO=off cargo test --package=javy-cli --release --features=$(CLI_FEATURES) -- --nocapture
 
-# WPT requires a Javy build with the experimental_event_loop feature to pass
-test-wpt: export CORE_FEATURES ?= experimental_event_loop
-test-wpt:
-# Can't use a prerequisite here b/c a prequisite will not cause a rebuild of the CLI
-	$(MAKE) cli
+test-runner:
+	cargo test --package=javy-runner -- --nocapture
+
+test-wpt: cli
 	npm install --prefix wpt
 	npm test --prefix wpt 
 
-tests: test-quickjs-wasm-rs test-javy test-apis test-core test-cli test-wpt
+tests: test-javy test-plugin-api test-plugin test-runner test-cli test-wpt
 
-fmt: fmt-quickjs-wasm-sys fmt-quickjs-wasm-rs fmt-javy fmt-apis fmt-core fmt-cli
-
-fmt-quickjs-wasm-sys:
-	cargo fmt --package=quickjs-wasm-sys -- --check
-	cargo clippy --package=quickjs-wasm-sys --target=wasm32-wasi --all-targets -- -D warnings
-
-fmt-quickjs-wasm-rs:
-	cargo fmt --package=quickjs-wasm-rs -- --check
-	cargo clippy --package=quickjs-wasm-rs --target=wasm32-wasi --all-targets -- -D warnings
+fmt: fmt-javy fmt-plugin-api fmt-plugin fmt-cli
 
 fmt-javy:
 	cargo fmt --package=javy -- --check
-	cargo clippy --package=javy --target=wasm32-wasi --all-targets -- -D warnings
+	cargo clippy --package=javy --target=wasm32-wasip1 --all-targets -- -D warnings
 
-fmt-apis:
-	cargo fmt --package=javy-apis -- --check
-	cargo clippy --package=javy-apis --all-features --target=wasm32-wasi --all-targets -- -D warnings
+fmt-plugin-api:
+	cargo fmt --package=javy-plugin-api -- --check
+	cargo clippy --package=javy-plugin-api --target=wasm32-wasip1 --all-targets -- -D warnings
 
-fmt-core:
-	cargo fmt --package=javy-core -- --check
-	cargo clippy --package=javy-core --target=wasm32-wasi --all-targets -- -D warnings
+fmt-plugin:
+	cargo fmt --package=javy-plugin -- --check
+	cargo clippy --package=javy-plugin --target=wasm32-wasip1 --all-targets -- -D warnings
 
 # Use `--release` on CLI clippy to align with `test-cli`.
 # This reduces the size of the target directory which improves CI stability.
 fmt-cli:
 	cargo fmt --package=javy-cli -- --check
 	CARGO_PROFILE_RELEASE_LTO=off cargo clippy --package=javy-cli --release --all-targets -- -D warnings
-
-clean: clean-wasi-sdk clean-cargo
-
-clean-cargo:
-	cargo clean
-
-clean-wasi-sdk:
-	rm -r crates/quickjs-wasm-sys/wasi-sdk 2> /dev/null || true

@@ -4,10 +4,10 @@ use num_format::{Locale, ToFormattedString};
 use std::{fmt::Display, fs, path::Path, process::Command};
 use wasi_common::{
     pipe::{ReadPipe, WritePipe},
+    sync::WasiCtxBuilder,
     WasiCtx,
 };
-use wasmtime::{Engine, Linker, Module, Store};
-use wasmtime_wasi::sync::WasiCtxBuilder;
+use wasmtime::{AsContextMut, Engine, Linker, Module, Store};
 
 struct FunctionCase {
     name: String,
@@ -84,22 +84,26 @@ impl FunctionCase {
         Ok(function_case)
     }
 
-    pub fn run(&self, linker: &mut Linker<WasiCtx>, mut store: &mut Store<WasiCtx>) -> Result<()> {
+    pub fn run(
+        &self,
+        linker: &mut Linker<WasiCtx>,
+        mut store: impl AsContextMut<Data = WasiCtx>,
+    ) -> Result<()> {
         let js_module = match &self.precompiled_elf_bytes {
             Some(bytes) => unsafe { Module::deserialize(&self.engine, bytes) }?,
             None => Module::new(&self.engine, &self.wasm_bytes)?,
         };
 
-        let consumer_instance = linker.instantiate(&mut store, &js_module)?;
-        linker.instance(&mut store, "consumer", consumer_instance)?;
+        let consumer_instance = linker.instantiate(store.as_context_mut(), &js_module)?;
+        linker.instance(store.as_context_mut(), "consumer", consumer_instance)?;
 
         linker
-            .get(&mut store, "consumer", "_start")
+            .get(store.as_context_mut(), "consumer", "_start")
             .unwrap()
             .into_func()
             .unwrap()
-            .typed::<(), ()>(&mut store)?
-            .call(&mut store, ())?;
+            .typed::<(), ()>(store.as_context())?
+            .call(store.as_context_mut(), ())?;
         Ok(())
     }
 
@@ -110,18 +114,18 @@ impl FunctionCase {
             .stdout(Box::new(WritePipe::new_in_memory()))
             .stderr(Box::new(WritePipe::new_in_memory()))
             .build();
-        wasmtime_wasi::add_to_linker(&mut linker, |s| s).unwrap();
+        wasi_common::sync::add_to_linker(&mut linker, |s| s).unwrap();
         let mut store = Store::new(&self.engine, wasi);
 
         if let Linking::Dynamic = self.linking {
-            let qjs_provider = Module::new(
+            let plugin = Module::new(
                 &self.engine,
                 fs::read(Path::new(
-                    "../../target/wasm32-wasi/release/javy_quickjs_provider_wizened.wasm",
+                    "../../target/wasm32-wasip1/release/plugin_wizened.wasm",
                 ))?,
             )?;
-            let instance = linker.instantiate(&mut store, &qjs_provider)?;
-            linker.instance(&mut store, "javy_quickjs_provider_v1", instance)?;
+            let instance = linker.instantiate(store.as_context_mut(), &plugin)?;
+            linker.instance(store.as_context_mut(), "javy_quickjs_provider_v3", instance)?;
         }
 
         Ok((linker, store))
@@ -132,6 +136,15 @@ pub fn criterion_benchmark(c: &mut Criterion) {
     let mut function_cases = vec![];
     for linking in [Linking::Static, Linking::Dynamic] {
         for compilation in [Compilation::JustInTime, Compilation::AheadOfTime] {
+            function_cases.push(
+                FunctionCase::new(
+                    Path::new("benches/functions/empty"),
+                    Path::new("index.js"),
+                    &compilation,
+                    linking,
+                )
+                .unwrap(),
+            );
             function_cases.push(
                 FunctionCase::new(
                     Path::new("benches/functions/simple_discount"),
@@ -169,7 +182,7 @@ pub fn criterion_benchmark(c: &mut Criterion) {
             |b, f| {
                 b.iter_with_setup(
                     || function_case.setup().unwrap(),
-                    |(mut linker, mut store)| f.run(&mut linker, &mut store).unwrap(),
+                    |(mut linker, mut store)| f.run(&mut linker, store.as_context_mut()).unwrap(),
                 )
             },
         );
@@ -178,13 +191,14 @@ pub fn criterion_benchmark(c: &mut Criterion) {
 
 fn execute_javy(index_js: &Path, wasm: &Path, linking: &Linking) -> Result<()> {
     let mut args = vec![
-        "compile",
+        "build",
         index_js.to_str().unwrap(),
         "-o",
         wasm.to_str().unwrap(),
     ];
     if let Linking::Dynamic = linking {
-        args.push("-d");
+        args.push("-C");
+        args.push("dynamic");
     }
     let status_code = Command::new(Path::new("../../target/release/javy").to_str().unwrap())
         .args(args)

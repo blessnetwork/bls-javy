@@ -20,11 +20,11 @@ use swc_core::{
             Decl, EsVersion, ExportDecl, ExportSpecifier, Module, ModuleDecl, ModuleExportName,
             ModuleItem, Stmt,
         },
-        parser::{self, EsConfig, Syntax},
+        parser::{self, EsSyntax, Syntax},
     },
 };
 
-use crate::bytecode;
+use crate::plugins::Plugin;
 
 #[derive(Clone, Debug)]
 pub struct JS {
@@ -50,8 +50,9 @@ impl JS {
         self.source_code.as_bytes()
     }
 
-    pub fn compile(&self) -> Result<Vec<u8>> {
-        bytecode::compile_source(self.source_code.as_bytes())
+    /// Compiles a JavaScript source to bytecode using a QuickJS plugin.
+    pub fn compile(&self, plugin: &Plugin) -> Result<Vec<u8>> {
+        plugin.compile_source(self.source_code.as_bytes())
     }
 
     pub fn compress(&self) -> Result<Vec<u8>> {
@@ -148,11 +149,11 @@ impl JS {
 
     fn parse_module(&self) -> Result<Module> {
         let source_map: SourceMap = Default::default();
-        let file = source_map.new_source_file_from(FileName::Anon, self.source_code.clone());
+        let file = source_map.new_source_file_from(FileName::Anon.into(), self.source_code.clone());
         let mut errors = vec![];
         parser::parse_file_as_module(
             &file,
-            Syntax::Es(EsConfig::default()),
+            Syntax::Es(EsSyntax::default()),
             EsVersion::Es2020,
             None,
             &mut errors,
