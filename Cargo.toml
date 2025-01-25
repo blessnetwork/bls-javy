@@ -6,6 +6,7 @@ members = [
   "crates/plugin-api",
   "crates/test-macros",
   "crates/test-plugin",
+  "crates/bless-plugins",
   "crates/runner",
   "fuzz",
 ]

@@ -291,6 +291,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "blockless-sdk"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4567ec9632cf48e7a5225b5a075f334f1c8a364d4ff9692925d58de1b17dcb0c"
+dependencies = [
+ "json",
+]
+
+[[package]]
 name = "brotli"
 version = "7.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1567,6 +1576,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "javy-bless-plugins"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "blockless-sdk",
+ "javy-plugin-api",
+]
+
+[[package]]
 name = "javy-cli"
 version = "5.0.1"
 dependencies = [
@@ -1672,6 +1690,12 @@ checksum = "29c15563dc2726973df627357ce0c9ddddbea194836909d655df6a75d2cf296d"
 dependencies = [
  "wasm-bindgen",
 ]
+
+[[package]]
+name = "json"
+version = "0.12.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "078e285eafdfb6c4b434e0d31e8cfcb5115b651496faca5749b88fafd4f23bfd"
 
 [[package]]
 name = "lazy_static"
