@@ -34,6 +34,24 @@ size.
 Pre-compiled binaries of the Javy CLI can be found on [the releases
 page](https://github.com/bytecodealliance/javy/releases).
 
+## Build bls-javy and plugins
+
+```sh
+# build the core plugins
+cargo build --release --target wasm32-wasip1 -p javy-plugin
+```
+
+```sh
+# build test plugin (for testing)
+cargo build --target=wasm32-wasip1 --release -p javy-test-plugin
+# rebuild the plugin with javy runtime
+cargo run -p javy-cli -- init-plugin ./target/wasm32-wasip1/release/test_plugin.wasm -o test_plugin.wasm
+# create dummy js file
+echo "console.log('Hello, World!');" > index.js
+# compile javascript to wasm with javy runtime and plugin
+cargo run -p javy-cli -- build -C plugin=test_plugin.wasm ./index.js
+```
+
 ## Example
 
 Define your JavaScript like:
