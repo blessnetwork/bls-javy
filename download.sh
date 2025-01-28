@@ -12,7 +12,6 @@ function fail {
 }
 function install {
 	#settings
-	USER="blocklessnetwork"
 	PROG='blsjavy'
 	MOVE="true"
 	RELEASE="latest"
@@ -69,19 +68,19 @@ function install {
 	VERSION=${1:-$DEFAULT_VERSION} 
 	case "${OS}_${ARCH}" in
 	"darwin_amd64")
-		URL="https://github.com/blocklessnetwork/bls-javy/releases/download/${VERSION}/javy-x86_64-macos-${VERSION}.gz"
+		URL="https://github.com/blessnetwork/bls-javy/releases/download/${VERSION}/javy-x86_64-macos-${VERSION}.gz"
 		FTYPE=".gz"
 		;;
 	"darwin_arm64")
-		URL="https://github.com/blocklessnetwork/bls-javy/releases/download/${VERSION}/javy-arm-macos-${VERSION}.gz"
+		URL="https://github.com/blessnetwork/bls-javy/releases/download/${VERSION}/javy-arm-macos-${VERSION}.gz"
 		FTYPE=".gz"
 		;;
 	"linux_amd64")
-		URL="https://github.com/blocklessnetwork/bls-javy/releases/download/${VERSION}/javy-x86_64-linux-${VERSION}.gz"
+		URL="https://github.com/blessnetwork/bls-javy/releases/download/${VERSION}/javy-x86_64-linux-${VERSION}.gz"
 		FTYPE=".gz"
 		;;
 	"linux_arm64")
-		URL="https://github.com/blocklessnetwork/bls-javy/releases/download/${VERSION}/javy-arm-linux-${VERSION}.gz"
+		URL="https://github.com/blessnetwork/bls-javy/releases/download/${VERSION}/javy-arm-linux-${VERSION}.gz"
 		FTYPE=".gz"
 		;;
 	*) fail "No asset for platform ${OS}-${ARCH}";;
