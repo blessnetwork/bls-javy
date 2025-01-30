@@ -15,11 +15,11 @@ cli: core
 	CARGO_PROFILE_RELEASE_LTO=off cargo build --package=javy-cli --release
 
 core:
-	cargo build --package=javy-core --release --target=wasm32-wasi --features=experimental_event_loop,runtime_bls
+	cargo build --package=javy-core --release --target=wasm32-wasip1 --features=experimental_event_loop,runtime_bls
 
 docs:
 	cargo doc --package=javy-cli --open
-	cargo doc --package=javy-core --open --target=wasm32-wasi
+	cargo doc --package=javy-core --open --target=wasm32-wasip1
 
 test-quickjs-wasm-rs:
 	cargo wasi test --package=quickjs-wasm-rs -- --nocapture
@@ -53,23 +53,23 @@ fmt: fmt-quickjs-wasm-sys fmt-quickjs-wasm-rs fmt-javy fmt-apis fmt-core fmt-cli
 
 fmt-quickjs-wasm-sys:
 	cargo fmt --package=quickjs-wasm-sys -- --check
-	cargo clippy --package=quickjs-wasm-sys --target=wasm32-wasi --all-targets -- -D warnings
+	cargo clippy --package=quickjs-wasm-sys --target=wasm32-wasip1 --all-targets -- -D warnings
 
 fmt-quickjs-wasm-rs:
 	cargo fmt --package=quickjs-wasm-rs -- --check
-	cargo clippy --package=quickjs-wasm-rs --target=wasm32-wasi --all-targets -- -D warnings
+	cargo clippy --package=quickjs-wasm-rs --target=wasm32-wasip1 --all-targets -- -D warnings
 
 fmt-javy:
 	cargo fmt --package=javy -- --check
-	cargo clippy --package=javy --target=wasm32-wasi --all-targets -- -D warnings
+	cargo clippy --package=javy --target=wasm32-wasip1 --all-targets -- -D warnings
 
 fmt-apis:
 	cargo fmt --package=javy-apis -- --check
-	cargo clippy --package=javy-apis --all-features --target=wasm32-wasi --all-targets -- -D warnings
+	cargo clippy --package=javy-apis --all-features --target=wasm32-wasip1 --all-targets -- -D warnings
 
 fmt-core:
 	cargo fmt --package=javy-core -- --check
-	cargo clippy --package=javy-core --target=wasm32-wasi --all-targets -- -D warnings
+	cargo clippy --package=javy-core --target=wasm32-wasip1 --all-targets -- -D warnings
 
 # Use `--release` on CLI clippy to align with `test-cli`.
 # This reduces the size of the target directory which improves CI stability.
