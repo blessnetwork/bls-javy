@@ -773,6 +773,7 @@ impl Runner {
         Ok((bytecode_ptr, bytecode_len))
     }
 
+    #[allow(clippy::useless_conversion)]
     fn allocate_memory(
         instance: &Instance,
         mut store: impl AsContextMut,
