@@ -716,6 +716,7 @@ impl Runner {
         self.extract_store_data(res, store)
     }
 
+    #[allow(clippy::useless_conversion)]
     fn copy_func_name(
         name: &str,
         instance: &Instance,
@@ -740,6 +741,7 @@ impl Runner {
         Ok((fn_name_ptr, fn_name_bytes.len().try_into()?))
     }
 
+    #[allow(clippy::useless_conversion)]
     fn compile(
         source: &[u8],
         mut store: impl AsContextMut,
