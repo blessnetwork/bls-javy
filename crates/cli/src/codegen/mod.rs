@@ -148,7 +148,7 @@ impl Generator {
                     .init_func("initialize_runtime")
                     .make_linker(Some(Rc::new(move |engine| {
                         let mut linker = Linker::new(engine);
-                        wasmtime_wasi::preview1::add_to_linker_sync(&mut linker, move |cx| {
+                        wasmtime_wasi::preview1::add_to_linker_sync(&mut linker, move |cx: &mut wasmtime_wasi::WasiCtx| {
                             if cx.wasi_ctx.is_none() {
                                 // The underlying buffer backing the pipe is an Arc
                                 // so the cloning should be fast.
