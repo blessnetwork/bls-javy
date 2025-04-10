@@ -82,7 +82,7 @@ end = "2024-10-03"
 criteria = "safe-to-deploy"
 user-id = 6825 # Dan Gohman (sunfishcode)
 start = "2020-12-11"
-end = "2024-07-25"
+end = "2026-03-03"
 
 [[trusted.cap-net-ext]]
 criteria = "safe-to-deploy"
@@ -94,7 +94,7 @@ end = "2025-01-03"
 criteria = "safe-to-deploy"
 user-id = 6825 # Dan Gohman (sunfishcode)
 start = "2020-08-07"
-end = "2024-07-25"
+end = "2026-03-03"
 
 [[trusted.cap-rand]]
 criteria = "safe-to-deploy"
@@ -106,13 +106,13 @@ end = "2025-01-03"
 criteria = "safe-to-deploy"
 user-id = 6825 # Dan Gohman (sunfishcode)
 start = "2020-06-25"
-end = "2024-07-25"
+end = "2026-03-03"
 
 [[trusted.cap-time-ext]]
 criteria = "safe-to-deploy"
 user-id = 6825 # Dan Gohman (sunfishcode)
 start = "2020-09-21"
-end = "2024-07-25"
+end = "2026-03-03"
 
 [[trusted.cc]]
 criteria = "safe-to-deploy"
@@ -220,7 +220,7 @@ end = "2024-10-03"
 criteria = "safe-to-deploy"
 user-id = 6825 # Dan Gohman (sunfishcode)
 start = "2023-08-29"
-end = "2025-01-04"
+end = "2026-04-08"
 
 [[trusted.fd-lock]]
 criteria = "safe-to-deploy"
@@ -286,7 +286,7 @@ end = "2026-01-07"
 criteria = "safe-to-deploy"
 user-id = 6825 # Dan Gohman (sunfishcode)
 start = "2021-11-09"
-end = "2024-07-25"
+end = "2026-03-03"
 
 [[trusted.io-lifetimes]]
 criteria = "safe-to-deploy"
@@ -326,7 +326,7 @@ end = "2024-07-25"
 
 [[trusted.libc]]
 criteria = "safe-to-deploy"
-user-id = 51017
+user-id = 51017 # Yuki Okushi (JohnTitor)
 start = "2020-03-17"
 end = "2024-10-30"
 
@@ -340,7 +340,7 @@ end = "2025-12-04"
 criteria = "safe-to-deploy"
 user-id = 6825 # Dan Gohman (sunfishcode)
 start = "2021-06-12"
-end = "2024-07-25"
+end = "2026-04-08"
 
 [[trusted.memchr]]
 criteria = "safe-to-deploy"
@@ -382,7 +382,7 @@ end = "2024-07-12"
 criteria = "safe-to-deploy"
 user-id = 3618 # David Tolnay (dtolnay)
 start = "2019-04-23"
-end = "2025-01-03"
+end = "2026-03-03"
 
 [[trusted.quickcheck]]
 criteria = "safe-to-deploy"
@@ -394,7 +394,7 @@ end = "2024-10-03"
 criteria = "safe-to-deploy"
 user-id = 3618 # David Tolnay (dtolnay)
 start = "2019-04-09"
-end = "2025-01-03"
+end = "2026-03-03"
 
 [[trusted.rayon]]
 criteria = "safe-to-deploy"
@@ -526,7 +526,7 @@ end = "2025-01-03"
 criteria = "safe-to-deploy"
 user-id = 6825 # Dan Gohman (sunfishcode)
 start = "2019-03-06"
-end = "2024-07-25"
+end = "2026-03-03"
 
 [[trusted.termcolor]]
 criteria = "safe-to-deploy"
@@ -550,7 +550,7 @@ end = "2025-01-03"
 criteria = "safe-to-deploy"
 user-id = 10 # Carl Lerche (carllerche)
 start = "2019-03-02"
-end = "2024-12-04"
+end = "2026-04-09"
 
 [[trusted.tokio]]
 criteria = "safe-to-deploy"
@@ -594,6 +594,12 @@ user-id = 189 # Andrew Gallant (BurntSushi)
 start = "2019-06-09"
 end = "2024-10-03"
 
+[[trusted.wasi]]
+criteria = "safe-to-deploy"
+user-id = 1 # Alex Crichton (alexcrichton)
+start = "2020-06-03"
+end = "2026-02-03"
+
 [[trusted.wasi-common]]
 criteria = "safe-to-deploy"
 user-id = 1 # Alex Crichton (alexcrichton)
@@ -610,7 +616,7 @@ end = "2025-01-03"
 criteria = "safe-to-deploy"
 user-id = 1 # Alex Crichton (alexcrichton)
 start = "2019-03-04"
-end = "2025-01-03"
+end = "2026-04-08"
 
 [[trusted.wasm-bindgen-macro]]
 criteria = "safe-to-deploy"
@@ -622,13 +628,13 @@ end = "2025-01-03"
 criteria = "safe-to-deploy"
 user-id = 1 # Alex Crichton (alexcrichton)
 start = "2019-03-04"
-end = "2025-01-03"
+end = "2026-04-08"
 
 [[trusted.wasm-bindgen-shared]]
 criteria = "safe-to-deploy"
 user-id = 1 # Alex Crichton (alexcrichton)
 start = "2019-03-04"
-end = "2025-01-03"
+end = "2026-04-08"
 
 [[trusted.wasm-encoder]]
 criteria = "safe-to-deploy"
@@ -682,7 +688,7 @@ end = "2025-05-02"
 criteria = "safe-to-deploy"
 user-id = 73222 # wasmtime-publish
 start = "2023-08-21"
-end = "2025-01-03"
+end = "2026-03-03"
 
 [[trusted.web-sys]]
 criteria = "safe-to-deploy"
@@ -784,4 +790,4 @@ end = "2025-03-01"
 criteria = "safe-to-deploy"
 user-id = 696 # Nick Fitzgerald (fitzgen)
 start = "2021-01-07"
-end = "2025-01-02"
+end = "2026-03-03"

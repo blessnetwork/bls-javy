@@ -1,11 +1,9 @@
 use anyhow::{anyhow, Result};
-use wasi_common::{sync::WasiCtxBuilder, WasiCtx};
 use wasmtime::{AsContextMut, Engine, Instance, Linker, Memory, Module, Store};
+use wasmtime_wasi::{preview1::WasiP1Ctx, WasiCtxBuilder};
 
-use crate::plugins::Plugin;
-
-pub fn compile_source(plugin: &Plugin, js_source_code: &[u8]) -> Result<Vec<u8>> {
-    let (mut store, instance, memory) = create_wasm_env(plugin)?;
+pub(crate) fn compile_source(plugin_bytes: &[u8], js_source_code: &[u8]) -> Result<Vec<u8>> {
+    let (mut store, instance, memory) = create_wasm_env(plugin_bytes)?;
     let (js_src_ptr, js_src_len) =
         copy_source_code_into_instance(js_source_code, store.as_context_mut(), &instance, &memory)?;
     let ret_ptr = call_compile(js_src_ptr, js_src_len, store.as_context_mut(), &instance)?;
@@ -13,16 +11,13 @@ pub fn compile_source(plugin: &Plugin, js_source_code: &[u8]) -> Result<Vec<u8>>
     Ok(bytecode)
 }
 
-fn create_wasm_env(plugin: &Plugin) -> Result<(Store<WasiCtx>, Instance, Memory)> {
+fn create_wasm_env(plugin_bytes: &[u8]) -> Result<(Store<WasiP1Ctx>, Instance, Memory)> {
     let engine = Engine::default();
-    let module = Module::new(&engine, plugin.as_bytes())?;
+    let module = Module::new(&engine, plugin_bytes)?;
     let mut linker = Linker::new(&engine);
-    wasi_common::sync::snapshots::preview_1::add_wasi_snapshot_preview1_to_linker(
-        &mut linker,
-        |s| s,
-    )?;
+    wasmtime_wasi::preview1::add_to_linker_sync(&mut linker, |s| s)?;
     linker.define_unknown_imports_as_traps(&module)?;
-    let wasi = WasiCtxBuilder::new().inherit_stderr().build();
+    let wasi = WasiCtxBuilder::new().inherit_stderr().build_p1();
     let mut store = Store::new(&engine, wasi);
     let instance = linker.instantiate(store.as_context_mut(), &module)?;
     let memory = instance
