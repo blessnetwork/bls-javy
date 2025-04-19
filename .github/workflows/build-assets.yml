@@ -160,6 +160,7 @@ jobs:
             export MUSL_DIR=${ARCH}-linux-musl-native
             wget https://musl.cc/${MUSL_DIR}.tgz
             tar xzvf ${MUSL_DIR}.tgz
+            export PATH=`pwd`/${MUSL_DIR}/bin:$PATH
             export CXX_${ARCH}_unknown_linux_musl=`pwd`/${MUSL_DIR}/bin/${ARCH}-linux-musl-g++
             export CC_${ARCH}_unknown_linux_musl=`pwd`/${MUSL_DIR}/bin/${ARCH}-linux-musl-gcc
           else
