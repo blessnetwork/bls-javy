@@ -157,18 +157,17 @@ jobs:
           arch=`uname -p`
           if [ "${arch}" == "x86_64" ]; then
             export ARCH=x86_64
+            export MUSL_DIR=${ARCH}-linux-musl-native
           else
             export ARCH=aarch64
+            export MUSL_DIR=${ARCH}-linux-musl-cross
           fi
-          MUSL_DIR=${ARCH}-linux-musl-native
           wget https://musl.cc/${MUSL_DIR}.tgz
           tar xzvf ${MUSL_DIR}.tgz
           export CXX_${ARCH}-unknown-linux-musl=`pwd`/${MUSL_DIR}/bin/${ARCH}-linux-musl-g++
           export CXX_${ARCH}_unknown_linux_musl=`pwd`/${MUSL_DIR}/bin/${ARCH}-linux-musl-g++
           export CC_${ARCH}-unknown-linux-musl=`pwd`/${MUSL_DIR}/bin/${ARCH}-linux-musl-gcc
           export CC_${ARCH}_unknown_linux_musl=`pwd`/${MUSL_DIR}/bin/${ARCH}-linux-musl-gcc
-          echo $CXX_${ARCH}_unknown_linux_musl
-          echo $CC_${ARCH}_unknown_linux_musl
           cargo build --release --target ${{ matrix.target }} --package javy-cli
         env:
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
