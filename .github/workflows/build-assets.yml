@@ -108,13 +108,13 @@ jobs:
             path: target/x86_64-unknown-linux-gnu/release/javy
             asset_name: javy-x86_64-linux-${{ github.event.release.tag_name }}
             shasum_cmd: sha256sum
-            target: x86_64-unknown-linux-gnu
+            target: x86_64-unknown-linux-musl
           - name: linux-arm64
             os: ubuntu-22.04 # Use oldest supported non-deprecated version so we link against older glibc version which allows running binary on a wider set of Linux systems
             path: target/aarch64-unknown-linux-gnu/release/javy
             asset_name: javy-arm-linux-${{ github.event.release.tag_name }}
             shasum_cmd: sha256sum
-            target: aarch64-unknown-linux-gnu
+            target: aarch64-unknown-linux-musl
           - name: macos
             os: macos-latest
             path: target/x86_64-apple-darwin/release/javy
@@ -152,7 +152,19 @@ jobs:
           path: target/wasm32-wasip1/release/
 
       - name: Build CLI ${{ matrix.os }}
-        run: cargo build --release --target ${{ matrix.target }} --package javy-cli
+        run: |
+          if [ "${{ matrix.os }}" == "ubuntu-22.04" ]; then
+            if [ "${ uname -p }" == "x86_64" ]; then
+              export ARCH=x86_64
+            else
+              export ARCH=aarch64
+            fi
+          fi
+          MUSL_DIR=${ARCH}-linux-musl-native
+          wget https://musl.cc/${MUSL_DIR}.tgz
+          tar xzvf ${MUSL_DIR}.tgz
+          CXX_x86_64_unknown_linux_musl=`pwd`/${MUSL_DIR}/bin/${ARCH}-linux-musl-c++
+          cargo build --release --target ${{ matrix.target }} --package javy-cli
         env:
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
 
