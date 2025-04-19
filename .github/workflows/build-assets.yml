@@ -164,9 +164,7 @@ jobs:
           fi
           wget https://musl.cc/${MUSL_DIR}.tgz
           tar xzvf ${MUSL_DIR}.tgz
-          export CXX_${ARCH}-unknown-linux-musl=`pwd`/${MUSL_DIR}/bin/${ARCH}-linux-musl-g++
           export CXX_${ARCH}_unknown_linux_musl=`pwd`/${MUSL_DIR}/bin/${ARCH}-linux-musl-g++
-          export CC_${ARCH}-unknown-linux-musl=`pwd`/${MUSL_DIR}/bin/${ARCH}-linux-musl-gcc
           export CC_${ARCH}_unknown_linux_musl=`pwd`/${MUSL_DIR}/bin/${ARCH}-linux-musl-gcc
           cargo build --release --target ${{ matrix.target }} --package javy-cli
         env:
