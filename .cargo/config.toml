@@ -10,3 +10,6 @@ rustflags = ["-C", "target-feature=+simd128"]
 # Ref: https://github.com/rust-lang/rust/pull/122268
 [target.x86_64-pc-windows-msvc]
 rustflags = ["-C", "target-feature=+crt-static"]
+
+[target.aarch64-unknown-linux-musl]
+linker = "aarch64-linux-musl-gcc"
