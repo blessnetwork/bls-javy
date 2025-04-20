@@ -108,7 +108,13 @@ jobs:
             path: target/x86_64-unknown-linux-gnu/release/javy
             asset_name: javy-x86_64-linux-${{ github.event.release.tag_name }}
             shasum_cmd: sha256sum
-            target: x86_64-unknown-linux-musl
+            target: x86_64-unknown-linux-gnu
+          - name: linux
+            os: ubuntu-21.04 # Use oldest supported non-deprecated version so we link against older glibc version which allows running binary on a wider set of Linux systems
+            path: target/x86_64-unknown-linux-gnu/release/javy
+            asset_name: javy-x86_64-linux-${{ github.event.release.tag_name }}
+            shasum_cmd: sha256sum
+            target: x86_64-unknown-linux-gnu
           - name: linux-arm64
             os: ubuntu-22.04 # Use oldest supported non-deprecated version so we link against older glibc version which allows running binary on a wider set of Linux systems
             path: target/aarch64-unknown-linux-gnu/release/javy
@@ -152,28 +158,6 @@ jobs:
           path: target/wasm32-wasip1/release/
 
       - name: Build CLI ${{ matrix.os }}
-        if: matrix.os == 'ubuntu-22.04'
-        run: |
-          arch=`uname -p`
-          if [ "${arch}" == "x86_64" ]; then
-            export ARCH=x86_64
-            export MUSL_DIR=${ARCH}-linux-musl-native
-            wget https://musl.cc/${MUSL_DIR}.tgz
-            tar xzvf ${MUSL_DIR}.tgz
-            export PATH=`pwd`/${MUSL_DIR}/bin:$PATH
-            export CXX_${ARCH}_unknown_linux_musl=`pwd`/${MUSL_DIR}/bin/${ARCH}-linux-musl-g++
-            export CC_${ARCH}_unknown_linux_musl=`pwd`/${MUSL_DIR}/bin/${ARCH}-linux-musl-gcc
-          else
-            export ARCH=aarch64
-            export MUSL_DIR=${ARCH}-linux-musl-cross
-          fi
-          
-          cargo build --release --target ${{ matrix.target }} --package javy-cli
-        env:
-          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
-      
-      - name: Build CLI ${{ matrix.os }}
-        if: matrix.os != 'ubuntu-22.04'
         run: cargo build --release --target ${{ matrix.target }} --package javy-cli
         env:
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
