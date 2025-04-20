@@ -1,0 +1,7 @@
+target/wasm32-wasip1/release/build/
+target/wasm32-wasip1/release/deps/
+target/wasm32-wasip1/release/incremental/
+target/aarch64-unknown-linux-musl/
+target/aarchx86_64-unknown-linux-musl/
+target/release/
+.github/
