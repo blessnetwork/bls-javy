@@ -109,10 +109,10 @@ jobs:
             asset_name: javy-x86_64-linux-${{ github.event.release.tag_name }}
             shasum_cmd: sha256sum
             target: x86_64-unknown-linux-gnu
-          - name: linux-glibc2.33
+          - name: linux-glibc2.31
             os: ubuntu-22.04 # Use oldest supported non-deprecated version so we link against older glibc version which allows running binary on a wider set of Linux systems
-            path: javy-glibc2.33
-            asset_name: javy-x86_64-linux-glibc2.33-${{ github.event.release.tag_name }}
+            path: javy-glibc2.31
+            asset_name: javy-x86_64-linux-glibc2.31-${{ github.event.release.tag_name }}
             shasum_cmd: sha256sum
             target: x86_64-unknown-linux-gnu
           - name: linux-arm64
@@ -158,11 +158,11 @@ jobs:
           path: target/wasm32-wasip1/release/
       
       - name: Build CLI ${{ matrix.os }}
-        if: matrix.name == 'linux-glibc2.33'
+        if: matrix.name == 'linux-glibc2.31'
         run: |
           docker build -t javy-cli .
           ci=$(docker create javy-cli)
-          docker cp $ci:/target/x86_64-unknown-linux-gnu/release/javy javy-glibc2.33
+          docker cp $ci:/target/x86_64-unknown-linux-gnu/release/javy javy-glibc2.31
 
       - name: Build CLI ${{ matrix.os }}
         run: cargo build --release --target ${{ matrix.target }} --package javy-cli
