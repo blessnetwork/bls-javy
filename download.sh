@@ -14,7 +14,7 @@ function fail {
 }
 function install {
 	#settings
-	PROG='blsjavy'
+	PROG='bls-javy'
 	MOVE="true"
 	RELEASE="latest"
 	INSECURE="false"
@@ -30,6 +30,7 @@ function install {
 	which tail > /dev/null || fail "tail not installed"
 	which cut > /dev/null || fail "cut not installed"
 	which du > /dev/null || fail "du not installed"
+	which jq > /dev/null || fail "jq not installed"
 	GET=""
 	if which curl > /dev/null; then
 		GET="curl"
@@ -66,7 +67,7 @@ function install {
 	#choose from asset list
 	URL=""
 	FTYPE=""
-	DEFAULT_VERSION="v1.4.0"
+	DEFAULT_VERSION=$(curl -L https://api.github.com/repos/blessnetwork/bls-javy/releases/latest|jq -r '.tag_name')
 	VERSION=${1:-$DEFAULT_VERSION} 
 	case "${OS}_${ARCH}" in
 	"darwin_amd64")
