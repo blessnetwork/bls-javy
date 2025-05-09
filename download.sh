@@ -1,5 +1,7 @@
 #!/bin/bash
-TMP_DIR="/tmp/blsjavy"
+TMP_DIR="$(mktemp -d)"
+BRIGHT_GREEN="\033[92m"
+NC="\033[0m"
 function cleanup {
 	rm -rf $TMP_DIR > /dev/null
 }
@@ -12,11 +14,11 @@ function fail {
 }
 function install {
 	#settings
-	PROG='blsjavy'
+	PROG='bls-javy'
 	MOVE="true"
 	RELEASE="latest"
 	INSECURE="false"
-	OUT_DIR="$HOME/.bin"
+	OUT_DIR="$HOME/.blessnet/bin"
 	GH="https://github.com"
 	#bash check
 	[ ! "$BASH_VERSION" ] && fail "Please use bash instead"
@@ -28,6 +30,7 @@ function install {
 	which tail > /dev/null || fail "tail not installed"
 	which cut > /dev/null || fail "cut not installed"
 	which du > /dev/null || fail "du not installed"
+	which jq > /dev/null || fail "jq not installed"
 	GET=""
 	if which curl > /dev/null; then
 		GET="curl"
@@ -64,7 +67,7 @@ function install {
 	#choose from asset list
 	URL=""
 	FTYPE=""
-	DEFAULT_VERSION="v1.4.0"
+	DEFAULT_VERSION=$(curl -L https://api.github.com/repos/blessnetwork/bls-javy/releases/latest|jq -r '.tag_name')
 	VERSION=${1:-$DEFAULT_VERSION} 
 	case "${OS}_${ARCH}" in
 	"darwin_amd64")
@@ -92,6 +95,7 @@ function install {
 	
 	echo "....."
 	
+	OLD_DIR=$(pwd)
 	#enter tempdir
 	mkdir -p $TMP_DIR
 	cd $TMP_DIR
@@ -121,8 +125,9 @@ function install {
 	mv $TMP_BIN $OUT_DIR/$PROG || fail "mv failed" #FINAL STEP!
 	echo "Installed $PROG $VERSION at $OUT_DIR/$PROG"
 	#done
+	cd $OLD_DIR
 	cleanup
 	echo "Please add the following line to your .bashrc or .zshrc:"
-	echo 'export PATH="$HOME/.bin:$PATH"'
+	echo -e "${BRIGHT_GREEN}export PATH=$OUT_DIR:\$PATH${NC}"
 }
 install $1
